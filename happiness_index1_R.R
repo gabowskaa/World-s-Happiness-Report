@@ -1,4 +1,5 @@
 library(dplyr)
+library(ggplot2)
 
 #loading data into datasets
 year_2015 = read.csv('2015.csv')
@@ -58,7 +59,6 @@ RANK_2017 = data.frame(countryid_ph= c(year_2017_2$Country),
 #creating one data frame for all 3 years
 RANK_ALL= rbind(RANK_2015, RANK_2016, RANK_2017)
 
-
 nazwy_niepowtarzajace_sie <- character(0) 
 unikalne_nazwy = unique(RANK_ALL$countryid_ph)
 
@@ -90,6 +90,48 @@ countries = data.frame(country_name=lista_unikalnych_krajow,
                        regionid="2")
 
 countries_done = countries[!duplicated(countries$country_name), ]
+
+
+
+
+#data analysis
+
+#creating a correlation heat map
+heat_m = data.frame(happiness_rank= c(RANK_ALL$happiness_rank),
+                 happiness_score= c(RANK_ALL$happiness_score),
+                 gdppc = c(RANK_ALL$gdppc),
+                 family = c(RANK_ALL$family),
+                 health = c(RANK_ALL$health),
+                 freedom = c(RANK_ALL$freedom),
+                 trust_in_gov = c(RANK_ALL$trust_in_gov),
+                 generosity = c(RANK_ALL$generosity),
+                 dystopia = c(RANK_ALL$dystopia)
+)
+cor_matrix = round(cor(heat_m), 2)
+cor_df = as.data.frame(as.table(cor_matrix))
+
+heatmap_plot = ggplot(data = cor_df, aes(x = Var1, y = Var2, fill = Freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Macierz Korelacji") +
+  xlab("") +
+  ylab("") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+print(heatmap_plot)
+
+#histogram 
+histogram = hist(RANK_ALL$health, 
+                 col= "#de4362",
+                 xlab = "Healthy_life_expectancy",
+                 main = " ",
+                 )
+
+mean_health <- mean(RANK_ALL$health)
+sd_health <- sd(RANK_ALL$health)
+curve(dnorm(x, mean = mean_health, sd = sd_health), 
+      col = "#009fff", lwd = 2, add = TRUE)
+print(historgam)
 
 
 #saving the data into csv
